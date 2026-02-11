@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "nama": "Andi",
+    "hari": "Senin",
+    "jam": "08:00",
+    "bagian": "Pidum"
+  },
+  {
+    "id": 2,
+    "nama": "Budi",
+    "hari": "Senin",
+    "jam": "10:00",
+    "bagian": "Datun"
+  },
+  {
+    "id": 3,
+    "nama": "Citra",
+    "hari": "Selasa",
+    "jam": "08:00",
+    "bagian": "Intel"
+  },
+  {
+    "id": 4,
+    "nama": "Deni",
+    "hari": "Selasa",
+    "jam": "10:00",
+    "bagian": "Pidum"
+  },
+  {
+    "id": 5,
+    "nama": "Eka",
+    "hari": "Rabu",
+    "jam": "08:00",
+    "bagian": "Datun"
+  },
+  {
+    "id": 6,
+    "nama": "Fajar",
+    "hari": "Rabu",
+    "jam": "10:00",
+    "bagian": "Intel"
+  },
+  {
+    "id": 7,
+    "nama": "Gina",
+    "hari": "Kamis",
+    "jam": "08:00",
+    "bagian": "Pidum"
+  },
+  {
+    "id": 8,
+    "nama": "Hadi",
+    "hari": "Kamis",
+    "jam": "10:00",
+    "bagian": "Datun"
+  },
+  {
+    "id": 9,
+    "nama": "Intan",
+    "hari": "Jumat",
+    "jam": "08:00",
+    "bagian": "Intel"
+  },
+  {
+    "id": 10,
+    "nama": "Joko",
+    "hari": "Jumat",
+    "jam": "10:00",
+    "bagian": "Pidum"
+  }
+]
