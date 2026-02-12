@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
 
 export default function SplashScreen({ navigation }) {
   useEffect(() => {
-    // Navigasi ke layar berikutnya setelah delay singkat
+    // Otomatis pindah ke layar Home setelah 2 detik
     const timer = setTimeout(() => {
       navigation.replace('Home');
     }, 2000);
@@ -15,8 +15,8 @@ export default function SplashScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Text style={styles.logo}>📅</Text>
-        <Text style={styles.appName}>Kejari Piket APP</Text>
-        <Text style={styles.tagline}>Lihat Jadwal Piket dengan Mudah</Text>
+        <Text style={styles.appName}>KEJARI PIKET APP</Text>
+        <Text style={styles.tagline}>Atur Jadwal Piket dengan Mudah</Text>
       </View>
       
       <View style={styles.loadingContainer}>

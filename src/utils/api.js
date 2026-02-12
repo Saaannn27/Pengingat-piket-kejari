@@ -1,6 +1,4 @@
 import axios from 'axios';
-
-// Example JSON URL (Replace with your actual JSON URL)
 const JSON_URL = 'https://raw.githubusercontent.com/Saaannn27/Pengingat-piket-kejari/refs/heads/main/jadwal-piket.json';
 
 // Data fallback jika pengambilan data gagal

@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import Screens
 import SplashScreenComponent from './src/screens/SplashScreen';
 import IdentityScreen from './src/screens/IdentityScreen';
+import HomeScreen from './src/screens/HomeScreen';
+
 
 const Stack = createStackNavigator();
 SplashScreen.preventAutoHideAsync();
@@ -19,7 +21,6 @@ export default function App() {
   useEffect(() => {
     async function prepareApp() {
       try {
-        // cek apakah user sudah mengisi identitas
         const storedName = await AsyncStorage.getItem('@user_name');
         
         if (storedName) {
@@ -29,7 +30,7 @@ export default function App() {
           setInitialRoute('Identity');
         }
 
-        // Setup notifications
+        // Set Notifikasi
         await NotificationManager.setupNotifications();
         
       } catch (error) {
@@ -67,10 +68,35 @@ export default function App() {
           component={SplashScreenComponent} 
           options={{ headerShown: false }} 
         />
+        <Stack.Screen
+          name="Identity"
+          component={IdentityScreen}
+          options={{
+            title: 'Kejari Piket App',
+            headerTitleAlign: 'center', 
+            headerStyle: {
+              backgroundColor: '#1B5E20', 
+            },
+            headerTintColor: '#FFFFFF',
+            headerTitleStyle: {
+              fontWeight: '700',
+            },
+          }}
+        />
         <Stack.Screen 
-          name="Identity" 
-          component={IdentityScreen} 
-          options={{ title: 'Identitas Pengguna' }} 
+          name="Home" 
+          component={HomeScreen} 
+          options={{
+            title: 'Dashboard Piket',
+            headerTitleAlign: 'center', 
+            headerStyle: {
+              backgroundColor: '#1B5E20', 
+            },
+            headerTintColor: '#FFFFFF',
+            headerTitleStyle: {
+              fontWeight: '700',
+            },
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
