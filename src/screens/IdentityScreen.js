@@ -25,7 +25,7 @@ export default function IdentityScreen({ navigation }) {
     setIsLoading(true);
     
     try {
-      // Simpan nama ke AsyncStorage
+      // Save to AsyncStorage
       await AsyncStorage.setItem('@user_name', name.trim());
       await AsyncStorage.setItem('@user_identity_set', 'true');
       
@@ -53,13 +53,13 @@ export default function IdentityScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.headerIcon}>👤</Text>
-          <Text style={styles.headerTitle}>Identitas Pengguna</Text>
-          <Text style={styles.headerSubtitle}>
-            Masukkan nama Anda untuk personalisasi jadwal piket
-          </Text>
-        </View>
+        <View style={styles.headerCard}>
+            <Text style={styles.headerIcon}>👤</Text>
+            <Text style={styles.headerTitle}>Identitas Pengguna</Text>
+            <Text style={styles.headerSubtitle}>
+              Masukkan nama Anda untuk personalisasi jadwal piket
+            </Text>
+          </View>
 
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
@@ -74,6 +74,16 @@ export default function IdentityScreen({ navigation }) {
             />
             <Text style={styles.helperText}>
               Nama ini akan digunakan untuk menampilkan jadwal piket Anda
+            </Text>
+          </View>
+
+          <View style={styles.infoBox}>
+            <Text style={styles.infoTitle}>⚠️ Informasi Penting</Text>
+            <Text style={styles.infoText}>
+              • Masukkan nama panjang tanpa gelar{'\n'}
+              • Data aman dan tidak dikirim ke server{'\n'}
+              • Anda bisa ubah nama nanti di Pengaturan{'\n'}
+              • Nama digunakan untuk filter jadwal piket
             </Text>
           </View>
         </View>
@@ -104,111 +114,136 @@ export default function IdentityScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F3F6F4',
   },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
     paddingTop: 40,
   },
-  header: {
+
+  // Header Card
+  headerCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 6,
   },
   headerIcon: {
-    fontSize: 60,
-    marginBottom: 16,
+    fontSize: 56,
+    marginBottom: 12,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1B5E20',
+    marginBottom: 6,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: '#546E7A',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
+
+  // Form Container
   formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
     padding: 20,
-    marginBottom: 20,
+    marginBottom: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 5,
   },
+
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 22,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    color: '#37474F',
+    marginBottom: 6,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: '#E0E0E0',
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    marginBottom: 8,
+    backgroundColor: '#FAFAFA',
   },
   helperText: {
     fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
+    color: '#78909C',
+    marginTop: 6,
   },
+
+  // INFO BOX
   infoBox: {
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#FFFDE7',
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#C8E6C9',
+    borderColor: '#E6D36F',
   },
   infoTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginBottom: 8,
+    fontWeight: '700',
+    color: '#9E7C0C',
+    marginBottom: 6,
   },
   infoText: {
     fontSize: 13,
-    color: '#333',
+    color: '#444',
     lineHeight: 18,
   },
+
+  // Button Container
   buttonContainer: {
     marginTop: 'auto',
     paddingBottom: 20,
   },
   button: {
-    backgroundColor: '#4CAF50',
-    padding: 16,
-    borderRadius: 10,
+    backgroundColor: '#1B5E20',
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
+    shadowColor: '#1B5E20',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#A5D6A7',
   },
   buttonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: 0.4,
   },
+
   skipButton: {
-    padding: 16,
+    paddingVertical: 12,
     alignItems: 'center',
   },
   skipButtonText: {
-    color: '#666',
+    color: '#607D8B',
     fontSize: 14,
   },
 });
+
