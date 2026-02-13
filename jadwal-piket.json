@@ -3,15 +3,15 @@
     "id": 1,
     "nama": "Andi",
     "hari": "Jumat",
-    "jam": "11:05",
+    "jam": "11:30",
     "bagian": "Pidum"
   },
   {
     "id": 2,
     "nama": "Budi",
-    "hari": "Senin",
-    "jam": "10:00",
-    "bagian": "Datun"
+    "hari": "Jumat",
+    "jam": "11:40",
+    "bagian": "Intel"
   },
   {
     "id": 3,
