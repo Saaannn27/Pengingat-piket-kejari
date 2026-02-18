@@ -1,0 +1,62 @@
+{
+  "instansi": "Kejaksaan Negeri Contoh",
+  "tahun": 2025,
+  "petugas": [
+    {
+      "id": 1,
+      "nama": "Ahmad Fauzi",
+      "jabatan": "Jaksa Fungsional",
+      "jadwal": [
+        {
+          "tanggal": "2025-07-14",
+          "hari": "Senin",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "Piket Pagi"
+        },
+        {
+          "tanggal": "2025-07-21",
+          "hari": "Senin",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "Piket Pagi"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nama": "Siti Rahayu",
+      "jabatan": "Staf TU",
+      "jadwal": [
+        {
+          "tanggal": "2025-07-15",
+          "hari": "Selasa",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "Piket Pagi"
+        },
+        {
+          "tanggal": "2025-07-22",
+          "hari": "Selasa",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "Piket Pagi"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "nama": "Budi Santoso",
+      "jabatan": "Jaksa Fungsional",
+      "jadwal": [
+        {
+          "tanggal": "2025-07-16",
+          "hari": "Rabu",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "Piket Pagi"
+        }
+      ]
+    }
+  ]
+}
