@@ -2,311 +2,179 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
+  TouchableOpacity,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Alert,
-  RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchScheduleData } from '../../src/utils/api';
-import NotificationManager from '../../src/components/NotificationManager';
-import ScheduleCard from '../../src/components/ScheduleCard';
+import COLORS from '../constants/colors';
+import { getUserData } from '../utils/storage';
+import {
+  scheduleNotificationPiket,
+  cancelAllNotifications,
+  getScheduledNotifications,
+} from '../services/notification';
 
 export default function HomeScreen({ navigation }) {
-  const [userName, setUserName] = useState('');
-  const [scheduleData, setScheduleData] = useState([]);
-  const [userSchedule, setUserSchedule] = useState([]);
-  const [nextSchedule, setNextSchedule] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [notificationStatus, setNotificationStatus] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [schedulingLoading, setSchedulingLoading] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
 
   useEffect(() => {
     loadUserData();
-    checkNotificationStatus();
   }, []);
 
-  useEffect(() => {
-    if (userName && scheduleData.length > 0) {
-      filterUserSchedule();
-    }
-  }, [userName, scheduleData]);
-
   const loadUserData = async () => {
-    try {
-      const name = await AsyncStorage.getItem('@user_name');
-      setUserName(name || 'Pengguna');
-      
-      await fetchAndProcessSchedule();
-    } catch (error) {
-      console.error('Error loading user data:', error);
-      Alert.alert('Error', 'Gagal memuat data pengguna');
-    } finally {
-      setIsLoading(false);
-    }
+    const data = await getUserData();
+    setUserData(data);
+    setLoading(false);
+
+    // Cek berapa notifikasi yang sudah terjadwal
+    const scheduled = await getScheduledNotifications();
+    setNotifCount(scheduled.length);
   };
 
-  const fetchAndProcessSchedule = async () => {
-    try {
-      const data = await fetchScheduleData();
-      setScheduleData(data);
-    } catch (error) {
-      console.error('Error fetching schedule:', error);
-      Alert.alert('Error', 'Gagal mengambil data jadwal dari server');
+  const handleAktifkanPengingat = async () => {
+    if (!userData?.user?.jadwal?.length) {
+      Alert.alert('Info', 'Tidak ada jadwal piket yang bisa diingatkan.');
+      return;
     }
-  };
 
-  const filterUserSchedule = () => {
-    if (!userName || !scheduleData) return;
-    
-    const userSchedules = scheduleData.filter(
-      item => item.nama.toLowerCase() === userName.toLowerCase()
-    );
-    
-    setUserSchedule(userSchedules);
-    
-    // Find next schedule
-    const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    
-    let nextScheduleFound = null;
-    
-    // Check today's schedule
-    const todaySchedule = userSchedules.find(
-      item => item.hari === days[today === 0 ? 6 : today - 1]
-    );
-    
-    if (todaySchedule) {
-      nextScheduleFound = {
-        ...todaySchedule,
-        isToday: true,
-        status: 'HARI_INI',
-      };
-    } else {
-      // Find next schedule
-      for (let i = 1; i <= 7; i++) {
-        const nextDayIndex = (today + i) % 7;
-        const nextDay = days[nextDayIndex === 0 ? 6 : nextDayIndex - 1];
-        
-        const nextDaySchedule = userSchedules.find(
-          item => item.hari === nextDay
-        );
-        
-        if (nextDaySchedule) {
-          nextScheduleFound = {
-            ...nextDaySchedule,
-            daysUntil: i,
-            status: 'AKAN_DATANG',
-          };
-          break;
-        }
+    setSchedulingLoading(true);
+
+    // Batalkan semua notifikasi lama dulu
+    await cancelAllNotifications();
+
+    let berhasil = 0;
+    let gagal = 0;
+
+    // Jadwalkan notifikasi untuk setiap jadwal piket
+    for (const jadwal of userData.user.jadwal) {
+      const result = await scheduleNotificationPiket(jadwal);
+      if (result.success) {
+        berhasil++;
+        console.log(`✅ Notifikasi dijadwalkan untuk: ${result.pesanWaktu}`);
+      } else {
+        gagal++;
       }
     }
-    
-    setNextSchedule(nextScheduleFound);
+
+    setSchedulingLoading(false);
+
+    // Update jumlah notifikasi
+    const scheduled = await getScheduledNotifications();
+    setNotifCount(scheduled.length);
+
+    Alert.alert(
+      '🔔 Pengingat Diaktifkan',
+      `${berhasil} pengingat berhasil dijadwalkan.\n${gagal > 0 ? `${gagal} gagal.` : ''}`,
+      [{ text: 'OK' }]
+    );
   };
 
-  const checkNotificationStatus = async () => {
-    const status = await NotificationManager.checkNotificationPermission();
-    setNotificationStatus(status);
+  // Format tanggal yang lebih ramah dibaca
+  const formatTanggal = (tanggal) => {
+    const date = new Date(tanggal);
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('id-ID', options);
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchAndProcessSchedule();
-    setRefreshing(false);
+  // Cek apakah jadwal sudah lewat
+  const isJadwalLewat = (tanggal, jam) => {
+    const [tahun, bulan, tgl] = tanggal.split('-').map(Number);
+    const [h, m] = jam.split(':').map(Number);
+    const jadwalDate = new Date(tahun, bulan - 1, tgl, h, m);
+    return jadwalDate <= new Date();
   };
 
-  const handleScheduleNotification = async (schedule) => {
-    try {
-      await NotificationManager.schedulePiketNotification(schedule);
-      Alert.alert('Berhasil', 'Notifikasi telah dijadwalkan');
-    } catch (error) {
-      Alert.alert('Error', 'Gagal menjadwalkan notifikasi');
-    }
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>Memuat data...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={['#4CAF50']}
-        />
-      }
-    >
-      {/* Welcome Header */}
-      <View style={styles.welcomeSection}>
-        <View style={styles.welcomeHeader}>
-          <Text style={styles.welcomeIcon}>👋</Text>
-          <View>
-            <Text style={styles.welcomeText}>Halo,</Text>
-            <Text style={styles.userName}>{userName}</Text>
-          </View>
-        </View>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => navigation.navigate('Settings')}
-        >
-          <Text style={styles.profileButtonText}>Pengaturan</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Next Schedule Card */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>⏰ Jadwal Berikutnya</Text>
-        
-        {nextSchedule ? (
-          <View style={styles.nextScheduleCard}>
-            <View style={styles.nextScheduleHeader}>
-              <View>
-                <Text style={styles.nextScheduleDay}>{nextSchedule.hari}</Text>
-                <Text style={styles.nextScheduleTime}>{nextSchedule.jam}</Text>
-              </View>
-              <View style={[
-                styles.statusBadge,
-                nextSchedule.isToday ? styles.todayBadge : styles.upcomingBadge
-              ]}>
-                <Text style={styles.statusText}>
-                  {nextSchedule.isToday ? 'HARI INI' : `${nextSchedule.daysUntil} HARI LAGI`}
-                </Text>
-              </View>
-            </View>
-            
-            <Text style={styles.nextScheduleName}>{nextSchedule.nama}</Text>
-            <Text style={styles.nextScheduleDept}>Bagian: {nextSchedule.bagian}</Text>
-            
-            <View style={styles.nextScheduleActions}>
-              <TouchableOpacity
-                style={styles.notifyButton}
-                onPress={() => handleScheduleNotification(nextSchedule)}
-              >
-                <Text style={styles.notifyButtonText}>🔔 Ingatkan Saya</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.emptyScheduleCard}>
-            <Text style={styles.emptyScheduleIcon}>📅</Text>
-            <Text style={styles.emptyScheduleText}>Tidak ada jadwal piket</Text>
-            <Text style={styles.emptyScheduleSubtext}>
-              {userName ? 'Tidak ditemukan jadwal untuk nama Anda' : 'Silakan atur nama Anda terlebih dahulu'}
-            </Text>
+    <ScrollView style={styles.container}>
+      {/* Card info user */}
+      <View style={styles.userCard}>
+        <Text style={styles.greeting}>Halo, 👋</Text>
+        <Text style={styles.userName}>{userData?.user?.nama}</Text>
+        <Text style={styles.userJabatan}>{userData?.user?.jabatan}</Text>
+        {notifCount > 0 && (
+          <View style={styles.notifBadge}>
+            <Text style={styles.notifBadgeText}>🔔 {notifCount} pengingat aktif</Text>
           </View>
         )}
       </View>
 
-      {/* Quick Stats */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{userSchedule.length}</Text>
-          <Text style={styles.statLabel}>Total Jadwal</Text>
-        </View>
-        
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>
-            {userSchedule.filter(s => {
-              const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabdu'];
-              const today = new Date().getDay();
-              return s.hari === days[today === 0 ? 6 : today - 1];
-            }).length}
-          </Text>
-          <Text style={styles.statLabel}>Hari Ini</Text>
-        </View>
-        
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>
-            {notificationStatus ? '✅' : '❌'}
-          </Text>
-          <Text style={styles.statLabel}>Notifikasi</Text>
-        </View>
-      </View>
-
-      {/* Quick Actions */}
+      {/* Jadwal piket user */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🚀 Aksi Cepat</Text>
-        
-        <View style={styles.quickActions}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('Schedule')}
-          >
-            <Text style={styles.actionIcon}>📋</Text>
-            <Text style={styles.actionText}>Lihat Semua Jadwal</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => {
-              Alert.alert(
-                'Refresh Jadwal',
-                'Ambil data terbaru dari server?',
-                [
-                  { text: 'Batal', style: 'cancel' },
-                  { text: 'Refresh', onPress: fetchAndProcessSchedule }
-                ]
-              );
-            }}
-          >
-            <Text style={styles.actionIcon}>🔄</Text>
-            <Text style={styles.actionText}>Refresh Data</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={async () => {
-              const result = await NotificationManager.sendTestNotification();
-              if (result) {
-                Alert.alert('Berhasil', 'Notifikasi test telah dikirim');
-              }
-            }}
-          >
-            <Text style={styles.actionIcon}>🔔</Text>
-            <Text style={styles.actionText}>Test Notifikasi</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <Text style={styles.actionIcon}>⚙️</Text>
-            <Text style={styles.actionText}>Pengaturan</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.sectionTitle}>📅 Jadwal Piket Saya</Text>
+
+        {userData?.user?.jadwal?.length > 0 ? (
+          userData.user.jadwal.map((item, index) => {
+            const sudahLewat = isJadwalLewat(item.tanggal, item.jam_mulai);
+            return (
+              <View
+                key={index}
+                style={[styles.jadwalCard, sudahLewat && styles.jadwalCardLewat]}
+              >
+                <View style={styles.jadwalHeader}>
+                  <Text style={styles.jadwalHari}>{item.hari}</Text>
+                  {sudahLewat && (
+                    <View style={styles.badgeLewat}>
+                      <Text style={styles.badgeLewatText}>Sudah Lewat</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.jadwalTanggal}>{formatTanggal(item.tanggal)}</Text>
+                <Text style={styles.jadwalJam}>
+                  ⏰ {item.jam_mulai} – {item.jam_selesai} WIB
+                </Text>
+                <Text style={styles.jadwalKeterangan}>📌 {item.keterangan}</Text>
+              </View>
+            );
+          })
+        ) : (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyText}>Tidak ada jadwal piket untuk kamu.</Text>
+          </View>
+        )}
       </View>
 
-      {/* Recent Schedules */}
-      {userSchedule.length > 0 && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>📅 Jadwal Saya</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Schedule')}>
-              <Text style={styles.seeAllText}>Lihat semua →</Text>
-            </TouchableOpacity>
-          </View>
-          
-          {userSchedule.slice(0, 3).map((item, index) => (
-            <ScheduleCard
-              key={index}
-              schedule={item}
-              onNotify={() => handleScheduleNotification(item)}
-            />
-          ))}
-        </View>
-      )}
+      {/* Tombol-tombol aksi */}
+      <View style={styles.actionContainer}>
+        <TouchableOpacity
+          style={[styles.btnPrimary, schedulingLoading && styles.btnDisabled]}
+          onPress={handleAktifkanPengingat}
+          disabled={schedulingLoading}
+        >
+          {schedulingLoading ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <Text style={styles.btnPrimaryText}>🔔 Aktifkan Pengingat</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.btnSecondary}
+          onPress={() => navigation.navigate('AllSchedule', { allData: userData?.allData })}
+        >
+          <Text style={styles.btnSecondaryText}>📋 Semua Jadwal</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.btnOutline}
+          onPress={() => navigation.navigate('Settings')}
+        >
+          <Text style={styles.btnOutlineText}>⚙️ Pengaturan</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -314,223 +182,158 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    color: COLORS.textLight,
   },
-  welcomeSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#1B5E20',
+  userCard: {
+    backgroundColor: COLORS.primary,
+    padding: 24,
+    paddingTop: 30,
   },
-  welcomeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  welcomeIcon: {
-    fontSize: 40,
-    marginRight: 12,
-  },
-  welcomeText: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.9)',
+  greeting: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
   },
   userName: {
+    color: COLORS.white,
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    marginTop: 4,
   },
-  profileButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  profileButtonText: {
-    color: '#fff',
+  userJabatan: {
+    color: 'rgba(255,255,255,0.7)',
     fontSize: 14,
-    fontWeight: '500',
+    marginTop: 4,
+  },
+  notifBadge: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginTop: 10,
+    alignSelf: 'flex-start',
+  },
+  notifBadgeText: {
+    color: '#333',
+    fontSize: 12,
+    fontWeight: '600',
   },
   section: {
-    padding: 20,
+    padding: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    color: COLORS.text,
+    marginBottom: 12,
   },
-  sectionHeader: {
+  jadwalCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+  },
+  jadwalCardLewat: {
+    borderLeftColor: COLORS.textLight,
+    opacity: 0.7,
+  },
+  jadwalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
   },
-  seeAllText: {
-    color: '#4CAF50',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  nextScheduleCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  nextScheduleHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  nextScheduleDay: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  nextScheduleTime: {
+  jadwalHari: {
     fontSize: 16,
-    color: '#666',
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  badgeLewat: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  badgeLewatText: {
+    fontSize: 10,
+    color: COLORS.textLight,
+  },
+  jadwalTanggal: {
+    color: COLORS.text,
+    fontSize: 14,
+    marginTop: 4,
+  },
+  jadwalJam: {
+    color: COLORS.textLight,
+    fontSize: 13,
+    marginTop: 4,
+  },
+  jadwalKeterangan: {
+    color: COLORS.textLight,
+    fontSize: 13,
     marginTop: 2,
   },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  todayBadge: {
-    backgroundColor: '#FFEB3B',
-  },
-  upcomingBadge: {
-    backgroundColor: '#E8F5E9',
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  nextScheduleName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  nextScheduleDept: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 16,
-  },
-  nextScheduleActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  notifyButton: {
-    backgroundColor: '#1B5E20',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  notifyButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  emptyScheduleCard: {
-    backgroundColor: '#fff',
+  emptyCard: {
+    backgroundColor: COLORS.white,
     borderRadius: 12,
-    padding: 30,
+    padding: 20,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  },
+  emptyText: {
+    color: COLORS.textLight,
+    fontSize: 14,
+  },
+  actionContainer: {
+    padding: 16,
+    paddingBottom: 30,
+    gap: 10,
+  },
+  btnPrimary: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
     elevation: 3,
   },
-  emptyScheduleIcon: {
-    fontSize: 40,
-    marginBottom: 12,
+  btnDisabled: {
+    backgroundColor: COLORS.textLight,
   },
-  emptyScheduleText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  emptyScheduleSubtext: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  statCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statNumber: {
-    fontSize: 24,
+  btnPrimaryText: {
+    color: COLORS.white,
     fontWeight: 'bold',
-    color: '#4CAF50',
-    marginBottom: 4,
+    fontSize: 15,
   },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  quickActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    backgroundColor: '#fff',
+  btnSecondary: {
+    backgroundColor: COLORS.secondary,
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 16,
     alignItems: 'center',
-    width: '48%',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
-  actionIcon: {
-    fontSize: 24,
-    marginBottom: 8,
+  btnSecondaryText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 15,
   },
-  actionText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
+  btnOutline: {
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  btnOutlineText: {
+    color: COLORS.primary,
+    fontWeight: 'bold',
+    fontSize: 15,
   },
 });

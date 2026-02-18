@@ -1,56 +1,35 @@
 {
   "expo": {
-    "name": "PiketApp",
-    "slug": "piketapp",
+    "name": "Piket Kejari",
+    "slug": "piket-kejari",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#4CAF50"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.piketapp",
-      "buildNumber": "1"
+      "backgroundColor": "#1a237e"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#4CAF50"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1a237e"
       },
-      "package": "com.yourcompany.piketapp",
-      "versionCode": 1,
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
+        "VIBRATE",
+        "POST_NOTIFICATIONS"
       ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
     "plugins": [
-      "expo-splash-screen",
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
-          "color": "#4CAF50",
-          "sounds": [
-            "./assets/notification-sound.wav"
-          ]
+          "icon": "./assets/icon.png",
+          "color": "#1a237e",
+          "sounds": []
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "your-project-id"
-      }
-    }
+    ]
   }
 }

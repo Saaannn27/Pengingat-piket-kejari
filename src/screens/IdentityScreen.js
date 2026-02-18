@@ -2,111 +2,108 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
-  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import COLORS from '../constants/colors';
+import { fetchPiketData, findUserByName } from '../services/api';
+import { saveUserName, saveUserData } from '../utils/storage';
 
 export default function IdentityScreen({ navigation }) {
-  const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [nama, setNama] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSaveIdentity = async () => {
-    if (!name.trim()) {
-      Alert.alert('Nama Diperlukan', 'Silakan masukkan nama Anda');
+  const handleLanjut = async () => {
+    // Validasi: nama tidak boleh kosong
+    if (!nama.trim()) {
+      setError('Nama tidak boleh kosong.');
       return;
     }
 
-    setIsLoading(true);
-    
-    try {
-      // Save to AsyncStorage
-      await AsyncStorage.setItem('@user_name', name.trim());
-      await AsyncStorage.setItem('@user_identity_set', 'true');
-      
-      Alert.alert(
-        'Berhasil!',
-        `Halo ${name.trim()}! Selamat menggunakan aplikasi Piket.`,
-        [
-          {
-            text: 'Lanjutkan',
-            onPress: () => navigation.replace('Home'),
-          },
-        ]
-      );
-    } catch (error) {
-      Alert.alert('Error', 'Gagal menyimpan identitas');
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+    setLoading(true);
+    setError('');
+
+    // Fetch data dari API
+    const result = await fetchPiketData();
+
+    if (!result.success) {
+      setError(result.message);
+      setLoading(false);
+      return;
     }
+
+    // Cari user berdasarkan nama
+    const userDitemukan = findUserByName(result.data, nama);
+
+    if (!userDitemukan) {
+      setError(`Nama "${nama}" tidak ditemukan dalam daftar piket. Periksa ejaan nama kamu.`);
+      setLoading(false);
+      return;
+    }
+
+    // Simpan data user ke AsyncStorage
+    await saveUserName(userDitemukan.nama);
+    await saveUserData({
+      user: userDitemukan,
+      allData: result.data,
+    });
+
+    setLoading(false);
+
+    // Navigasi ke Home Screen
+    navigation.replace('Home');
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.headerCard}>
-            <Text style={styles.headerIcon}>👤</Text>
-            <Text style={styles.headerTitle}>Identitas Pengguna</Text>
-            <Text style={styles.headerSubtitle}>
-              Masukkan nama Anda untuk personalisasi jadwal piket
-            </Text>
+      <View style={styles.header}>
+        <Text style={styles.emoji}>🏛️</Text>
+        <Text style={styles.title}>Piket Kejari</Text>
+        <Text style={styles.subtitle}>Masukkan nama kamu untuk melihat jadwal piket</Text>
+      </View>
+
+      <View style={styles.form}>
+        <Text style={styles.label}>Nama Lengkap</Text>
+        <TextInput
+          style={[styles.input, error ? styles.inputError : null]}
+          placeholder="Contoh: Ahmad Fauzi"
+          value={nama}
+          onChangeText={(text) => {
+            setNama(text);
+            setError(''); // hapus error saat user mengetik
+          }}
+          autoCapitalize="words"
+          returnKeyType="done"
+          onSubmitEditing={handleLanjut}
+        />
+
+        {error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>⚠️ {error}</Text>
           </View>
+        ) : null}
 
-        <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nama Lengkap</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Contoh: Andi Wijaya"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
-              autoFocus
-            />
-            <Text style={styles.helperText}>
-              Nama ini akan digunakan untuk menampilkan jadwal piket Anda
-            </Text>
-          </View>
-
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>⚠️ Informasi Penting</Text>
-            <Text style={styles.infoText}>
-              • Masukkan nama panjang tanpa gelar{'\n'}
-              • Data aman dan tidak dikirim ke server{'\n'}
-              • Anda bisa ubah nama nanti di Pengaturan{'\n'}
-              • Nama digunakan untuk filter jadwal piket
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, (!name.trim() || isLoading) && styles.buttonDisabled]}
-            onPress={handleSaveIdentity}
-            disabled={!name.trim() || isLoading}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? 'Menyimpan...' : 'Simpan dan Lanjutkan'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={() => navigation.navigate('Home')}
-          >
-            <Text style={styles.skipButtonText}>Lewati untuk sekarang</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        <TouchableOpacity
+          style={[styles.button, loading ? styles.buttonDisabled : null]}
+          onPress={handleLanjut}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <Text style={styles.buttonText}>Lanjut →</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -114,136 +111,82 @@ export default function IdentityScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F6F4',
+    backgroundColor: COLORS.primary,
   },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 20,
-    paddingTop: 40,
-  },
-
-  // Header Card
-  headerCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 28,
-    paddingHorizontal: 20,
+  header: {
+    flex: 0.4,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 28,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
+    paddingHorizontal: 20,
   },
-  headerIcon: {
-    fontSize: 56,
-    marginBottom: 12,
+  emoji: {
+    fontSize: 60,
+    marginBottom: 10,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1B5E20',
-    marginBottom: 6,
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: COLORS.white,
   },
-  headerSubtitle: {
+  subtitle: {
     fontSize: 14,
-    color: '#546E7A',
+    color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
+    marginTop: 8,
     lineHeight: 20,
   },
-
-  // Form Container
-  formContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 20,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-
-  inputGroup: {
-    marginBottom: 22,
+  form: {
+    flex: 0.6,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 30,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#37474F',
-    marginBottom: 6,
+    color: COLORS.text,
+    marginBottom: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    borderRadius: 12,
     paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
-    backgroundColor: '#FAFAFA',
+    color: COLORS.text,
+    backgroundColor: '#fafafa',
   },
-  helperText: {
-    fontSize: 12,
-    color: '#78909C',
-    marginTop: 6,
+  inputError: {
+    borderColor: COLORS.error,
   },
-
-  // INFO BOX
-  infoBox: {
-    backgroundColor: '#FFFDE7',
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E6D36F',
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 10,
   },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#9E7C0C',
-    marginBottom: 6,
-  },
-  infoText: {
+  errorText: {
+    color: COLORS.error,
     fontSize: 13,
-    color: '#444',
     lineHeight: 18,
   },
-
-  // Button Container
-  buttonContainer: {
-    marginTop: 'auto',
-    paddingBottom: 20,
-  },
   button: {
-    backgroundColor: '#1B5E20',
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
     paddingVertical: 16,
-    borderRadius: 16,
     alignItems: 'center',
-    marginBottom: 14,
-    shadowColor: '#1B5E20',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 4,
+    marginTop: 20,
+    elevation: 3,
   },
   buttonDisabled: {
-    backgroundColor: '#A5D6A7',
+    backgroundColor: COLORS.textLight,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: COLORS.white,
     fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-  },
-
-  skipButton: {
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    color: '#607D8B',
-    fontSize: 14,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
 });
-

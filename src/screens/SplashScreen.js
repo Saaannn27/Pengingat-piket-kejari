@@ -1,32 +1,48 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Easing,
+} from 'react-native';
+import COLORS from '../constants/colors';
 
-export default function SplashScreen({ navigation }) {
+export default function SplashScreen() {
+  // Animasi fade-in untuk logo
+  const fadeAnim = new Animated.Value(0);
+  const scaleAnim = new Animated.Value(0.5);
+
   useEffect(() => {
-    // Otomatis pindah ke layar Home setelah 2 detik
-    const timer = setTimeout(() => {
-      navigation.replace('Home');
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [navigation]);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={styles.logo}>📅</Text>
-        <Text style={styles.appName}>KEJARI PIKET APP</Text>
-        <Text style={styles.tagline}>Atur Jadwal Piket dengan Mudah</Text>
-      </View>
-      
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Menyiapkan aplikasi...</Text>
-      </View>
-      
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Versi 1.0.0</Text>
-      </View>
+      <Animated.View
+        style={[
+          styles.logoContainer,
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+        ]}
+      >
+        {/* Ganti dengan Image komponen jika punya logo */}
+        <View style={styles.logoPlaceholder}>
+          <Text style={styles.logoEmoji}>🏛️</Text>
+        </View>
+        <Text style={styles.appName}>Piket Kejari</Text>
+        <Text style={styles.subtitle}>Pengingat Piket Kejaksaan Negeri</Text>
+      </Animated.View>
     </View>
   );
 }
@@ -34,44 +50,35 @@ export default function SplashScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 50,
   },
-  logo: {
-    fontSize: 80,
+  logoPlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 20,
+  },
+  logoEmoji: {
+    fontSize: 60,
   },
   appName: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4CAF50',
-    marginBottom: 8,
+    color: COLORS.white,
+    letterSpacing: 1,
   },
-  tagline: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    marginTop: 50,
-  },
-  loadingText: {
-    marginTop: 10,
+  subtitle: {
     fontSize: 14,
-    color: '#888',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-  },
-  footerText: {
-    fontSize: 12,
-    color: '#aaa',
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 8,
+    textAlign: 'center',
   },
 });
