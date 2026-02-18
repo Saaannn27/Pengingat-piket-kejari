@@ -1,60 +1,145 @@
 {
   "instansi": "Kejaksaan Negeri Agam",
+  "bulan": "Februari",
   "tahun": 2026,
   "petugas": [
     {
       "id": 1,
-      "nama": "Ahmad Fauzi",
+      "nama": "Fabio",
       "jabatan": "Jaksa Fungsional",
       "jadwal": [
         {
-          "tanggal": "2026-02-18",
-          "hari": "Rabu",
-          "jam_mulai": "08:00",
+          "tanggal": "2026-01-19",
+          "hari": "Senin",
+          "jam_mulai": "09:07",
           "jam_selesai": "17:00",
-          "keterangan": "Piket Pagi"
-        },
-        {
-          "tanggal": "2026-02-18",
-          "hari": "Rabu",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "Piket Pagi"
+          "keterangan": "KASI BB"
         }
       ]
     },
     {
       "id": 2,
-      "nama": "Siti Rahayu",
+      "nama": "Azaria",
       "jabatan": "Staf TU",
       "jadwal": [
         {
-          "tanggal": "2026-02-19",
-          "hari": "Kamis",
-          "jam_mulai": "08:00",
+          "tanggal": "2026-01-19",
+          "hari": "Senin",
+          "jam_mulai": "09:07",
           "jam_selesai": "17:00",
-          "keterangan": "Piket Pagi"
-        },
-        {
-          "tanggal": "2026-02-19",
-          "hari": "Kamis",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "Piket Pagi"
+          "keterangan": "KASI BB"
         }
       ]
     },
     {
       "id": 3,
-      "nama": "Budi Santoso",
+      "nama": "Yeli",
       "jabatan": "Jaksa Fungsional",
       "jadwal": [
         {
-          "tanggal": "2026-02-20",
+          "tanggal": "2026-01-20",
+          "hari": "Selasa",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "KASUBAG"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "nama": "Larosa",
+      "jabatan": "Staf TU",
+      "jadwal": [
+        {
+          "tanggal": "2026-01-20",
+          "hari": "Selasa",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "KASUBAG"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "nama": "Satya",
+      "jabatan": "Jaksa Fungsional",
+      "jadwal": [
+        {
+          "tanggal": "2026-01-21",
+          "hari": "Rabu",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "KASTEL"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "nama": "Tika",
+      "jabatan": "Jaksa Fungsional",
+      "jadwal": [
+        {
+          "tanggal": "2026-01-21",
+          "hari": "Rabu",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "KASTEL"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "nama": "Dzikrul",
+      "jabatan": "Staf TU",
+      "jadwal": [
+        {
+          "tanggal": "2026-01-22",
+          "hari": "Kamis",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "KASDUM"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "nama": "Winda",
+      "jabatan": "Jaksa Fungsional",
+      "jadwal": [
+        {
+          "tanggal": "2026-01-22",
+          "hari": "Kamis",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "KASDUM"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "nama": "Mutiara",
+      "jabatan": "Jaksa Fungsional",
+      "jadwal": [
+        {
+          "tanggal": "2026-01-23",
           "hari": "Jumat",
           "jam_mulai": "08:00",
           "jam_selesai": "17:00",
-          "keterangan": "Piket Pagi"
+          "keterangan": "KASTUN"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "nama": "Indah",
+      "jabatan": "Staf TU",
+      "jadwal": [
+        {
+          "tanggal": "2026-01-23",
+          "hari": "Jumat",
+          "jam_mulai": "08:00",
+          "jam_selesai": "17:00",
+          "keterangan": "KASTUN"
         }
       ]
     }
