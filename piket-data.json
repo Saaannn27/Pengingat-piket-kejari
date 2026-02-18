@@ -1,6 +1,6 @@
 {
-  "instansi": "Kejaksaan Negeri Contoh",
-  "tahun": 2025,
+  "instansi": "Kejaksaan Negeri Agam",
+  "tahun": 2026,
   "petugas": [
     {
       "id": 1,
@@ -8,15 +8,15 @@
       "jabatan": "Jaksa Fungsional",
       "jadwal": [
         {
-          "tanggal": "2025-07-14",
-          "hari": "Senin",
+          "tanggal": "2026-02-18",
+          "hari": "Rabu",
           "jam_mulai": "08:00",
           "jam_selesai": "17:00",
           "keterangan": "Piket Pagi"
         },
         {
-          "tanggal": "2025-07-21",
-          "hari": "Senin",
+          "tanggal": "2026-02-18",
+          "hari": "Rabu",
           "jam_mulai": "08:00",
           "jam_selesai": "17:00",
           "keterangan": "Piket Pagi"
@@ -29,15 +29,15 @@
       "jabatan": "Staf TU",
       "jadwal": [
         {
-          "tanggal": "2025-07-15",
-          "hari": "Selasa",
+          "tanggal": "2026-02-19",
+          "hari": "Kamis",
           "jam_mulai": "08:00",
           "jam_selesai": "17:00",
           "keterangan": "Piket Pagi"
         },
         {
-          "tanggal": "2025-07-22",
-          "hari": "Selasa",
+          "tanggal": "2026-02-19",
+          "hari": "Kamis",
           "jam_mulai": "08:00",
           "jam_selesai": "17:00",
           "keterangan": "Piket Pagi"
@@ -50,8 +50,8 @@
       "jabatan": "Jaksa Fungsional",
       "jadwal": [
         {
-          "tanggal": "2025-07-16",
-          "hari": "Rabu",
+          "tanggal": "2026-02-20",
+          "hari": "Jumat",
           "jam_mulai": "08:00",
           "jam_selesai": "17:00",
           "keterangan": "Piket Pagi"
