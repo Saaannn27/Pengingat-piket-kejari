@@ -19,7 +19,8 @@
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "POST_NOTIFICATIONS"
-      ]
+      ],
+      "package": "com.saann27.piketkejari"
     },
     "plugins": [
       [
@@ -30,6 +31,12 @@
           "sounds": []
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7a53d771-4a44-4f2a-abd8-3352a1c2a471"
+      }
+    },
+    "owner": "saann27"
   }
 }
