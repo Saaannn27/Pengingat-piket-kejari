@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  RefreshControl,
+  StatusBar,
 } from 'react-native';
 import COLORS from '../constants/colors';
 import { getUserData } from '../utils/storage';
@@ -15,12 +17,14 @@ import {
   cancelAllNotifications,
   getScheduledNotifications,
 } from '../services/notification';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen({ navigation }) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [schedulingLoading, setSchedulingLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     loadUserData();
@@ -31,10 +35,15 @@ export default function HomeScreen({ navigation }) {
     setUserData(data);
     setLoading(false);
 
-    // Cek berapa notifikasi yang sudah terjadwal
     const scheduled = await getScheduledNotifications();
     setNotifCount(scheduled.length);
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadUserData();
+    setRefreshing(false);
+  }, []);
 
   const handleAktifkanPengingat = async () => {
     if (!userData?.user?.jadwal?.length) {
@@ -42,298 +51,299 @@ export default function HomeScreen({ navigation }) {
       return;
     }
 
-    setSchedulingLoading(true);
-
-    // Batalkan semua notifikasi lama dulu
     await cancelAllNotifications();
 
     let berhasil = 0;
     let gagal = 0;
 
-    // Jadwalkan notifikasi untuk setiap jadwal piket
     for (const jadwal of userData.user.jadwal) {
       const result = await scheduleNotificationPiket(jadwal);
-      if (result.success) {
-        berhasil++;
-        console.log(`✅ Notifikasi dijadwalkan untuk: ${result.pesanWaktu}`);
-      } else {
-        gagal++;
-      }
+      if (result.success) berhasil++;
+      else gagal++;
     }
 
-    setSchedulingLoading(false);
-
-    // Update jumlah notifikasi
     const scheduled = await getScheduledNotifications();
     setNotifCount(scheduled.length);
 
     Alert.alert(
       '🔔 Pengingat Diaktifkan',
-      `${berhasil} pengingat berhasil dijadwalkan.\n${gagal > 0 ? `${gagal} gagal.` : ''}`,
-      [{ text: 'OK' }]
+      `${berhasil} berhasil.\n${gagal > 0 ? `${gagal} gagal.` : ''}`
     );
   };
 
-  // Format tanggal yang lebih ramah dibaca
   const formatTanggal = (tanggal) => {
     const date = new Date(tanggal);
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('id-ID', options);
   };
 
-  // Cek apakah jadwal sudah lewat
-  const isJadwalLewat = (tanggal, jam) => {
+  const getDateTime = (tanggal, jam) => {
     const [tahun, bulan, tgl] = tanggal.split('-').map(Number);
     const [h, m] = jam.split(':').map(Number);
-    const jadwalDate = new Date(tahun, bulan - 1, tgl, h, m);
-    return jadwalDate <= new Date();
+    return new Date(tahun, bulan - 1, tgl, h, m);
+  };
+
+  const isHariIni = (tanggal) => {
+    const today = new Date();
+    const date = new Date(tanggal);
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
         <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Memuat data...</Text>
+        <Text>Memuat data...</Text>
       </View>
     );
   }
 
+  const now = new Date();
+
+  const isSameDay = (date1, date2) => {
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
+  };
+
+  const sortedJadwal =
+  userData?.user?.jadwal
+    ?.slice()
+    .sort((a, b) => {
+      const dateA = getDateTime(a.tanggal, a.jam_mulai);
+      const dateB = getDateTime(b.tanggal, b.jam_mulai);
+
+      const aHariIni = isSameDay(dateA, now);
+      const bHariIni = isSameDay(dateB, now);
+
+      const aLewat = dateA < now;
+      const bLewat = dateB < now;
+      if (aHariIni && !bHariIni) return -1;
+      if (!aHariIni && bHariIni) return 1;
+      if (aLewat && !bLewat) return 1;
+      if (!aLewat && bLewat) return -1;
+      return dateA - dateB;
+    }) || [];
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Card info user */}
-      <View style={styles.userCard}>
-        <Text style={styles.greeting}>Halo, 👋</Text>
-        <Text style={styles.userName}>{userData?.user?.nama}</Text>
-        <Text style={styles.userJabatan}>{userData?.user?.jabatan}</Text>
-        {notifCount > 0 && (
-          <View style={styles.notifBadge}>
-            <Text style={styles.notifBadgeText}>🔔 {notifCount} pengingat aktif</Text>
-          </View>
-        )}
-      </View>
+    <View style={{ flex: 1, backgroundColor: COLORS.primary }}>
+      
+      {/* STATUS BAR */}
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      {/* Jadwal piket user */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📅 Jadwal Piket Saya</Text>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          backgroundColor: '#f5f7fa',
+          paddingBottom: insets.bottom + 20,
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* USER CARD */}
+        <View
+          style={[
+            styles.userCard,
+          ]}
+        >
+          <Text style={styles.greeting}>Halo 👋</Text>
+          <Text style={styles.userName}>{userData?.user?.nama}</Text>
+          <Text style={styles.userJabatan}>{userData?.user?.jabatan}</Text>
 
-        {userData?.user?.jadwal?.length > 0 ? (
-          userData.user.jadwal.map((item, index) => {
-            const sudahLewat = isJadwalLewat(item.tanggal, item.jam_mulai);
-            return (
-              <View
-                key={index}
-                style={[styles.jadwalCard, sudahLewat && styles.jadwalCardLewat]}
-              >
-                <View style={styles.jadwalHeader}>
-                  <Text style={styles.jadwalHari}>{item.hari}</Text>
-                  {sudahLewat && (
-                    <View style={styles.badgeLewat}>
-                      <Text style={styles.badgeLewatText}>Sudah Lewat</Text>
+          {notifCount > 0 && (
+            <View style={styles.notifBadge}>
+              <Text style={styles.notifBadgeText}>
+                🔔 {notifCount} pengingat aktif
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* SECTION */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📅 Jadwal Piket Saya</Text>
+
+          {sortedJadwal.length > 0 ? (
+            sortedJadwal.map((item, index) => {
+              const hariIni = isHariIni(item.tanggal);
+
+              return (
+                <View
+                  key={index}
+                  style={[
+                    styles.jadwalCard,
+                    hariIni && styles.cardHariIni,
+                  ]}
+                >
+                  {hariIni && (
+                    <View style={styles.badgeHariIni}>
+                      <Text style={styles.badgeHariIniText}>🔥 Hari Ini</Text>
                     </View>
                   )}
+
+                  <Text style={styles.jadwalHari}>{item.hari}</Text>
+                  <Text style={styles.jadwalTanggal}>
+                    {formatTanggal(item.tanggal)}
+                  </Text>
+                  <Text style={styles.jadwalJam}>
+                    ⏰ {item.jam_mulai} – {item.jam_selesai} WIB
+                  </Text>
+                  <Text style={styles.jadwalKeterangan}>
+                    📌 {item.keterangan}
+                  </Text>
                 </View>
-                <Text style={styles.jadwalTanggal}>{formatTanggal(item.tanggal)}</Text>
-                <Text style={styles.jadwalJam}>
-                  ⏰ {item.jam_mulai} – {item.jam_selesai} WIB
-                </Text>
-                <Text style={styles.jadwalKeterangan}>📌 {item.keterangan}</Text>
-              </View>
-            );
-          })
-        ) : (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>Tidak ada jadwal piket untuk kamu.</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Tombol-tombol aksi */}
-      <View style={styles.actionContainer}>
-        <TouchableOpacity
-          style={[styles.btnPrimary, schedulingLoading && styles.btnDisabled]}
-          onPress={handleAktifkanPengingat}
-          disabled={schedulingLoading}
-        >
-          {schedulingLoading ? (
-            <ActivityIndicator color={COLORS.white} />
+              );
+            })
           ) : (
-            <Text style={styles.btnPrimaryText}>🔔 Aktifkan Pengingat</Text>
+            <View style={styles.emptyCard}>
+              <Text>Tidak ada jadwal piket.</Text>
+            </View>
           )}
-        </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity
-          style={styles.btnSecondary}
-          onPress={() => navigation.navigate('AllSchedule', { allData: userData?.allData })}
-        >
-          <Text style={styles.btnSecondaryText}>📋 Semua Jadwal</Text>
-        </TouchableOpacity>
+        {/* BUTTON */}
+        <View style={styles.actionContainer}>
+          <TouchableOpacity
+            style={styles.btnPrimary}
+            onPress={handleAktifkanPengingat}
+          >
+            <Text style={styles.btnPrimaryText}>
+              🔔 Aktifkan Pengingat
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.btnOutline}
-          onPress={() => navigation.navigate('Settings')}
-        >
-          <Text style={styles.btnOutlineText}>⚙️ Pengaturan</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            style={styles.btnSecondary}
+            onPress={() => {
+              console.log("USER DATA:", userData);
+              console.log("ALL DATA:", userData?.allData);
+
+              navigation.navigate('AllSchedule', {
+                allData: userData?.allData,
+              });
+            }}
+          >
+            <Text style={styles.btnSecondaryText}>
+              📋 Semua Jadwal
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
-    marginTop: 10,
-    color: COLORS.textLight,
-  },
+
   userCard: {
     backgroundColor: COLORS.primary,
-    padding: 24,
-    paddingTop: 30,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  greeting: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-  },
-  userName: {
-    color: COLORS.white,
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  userJabatan: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-    marginTop: 4,
-  },
+
+  greeting: { color: '#fff', fontSize: 16 },
+  userName: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  userJabatan: { color: '#fff', marginBottom: 10 },
+
   notifBadge: {
-    backgroundColor: COLORS.accent,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginTop: 10,
+    backgroundColor: '#fff',
+    padding: 6,
+    borderRadius: 10,
     alignSelf: 'flex-start',
   },
+
   notifBadgeText: {
-    color: '#333',
     fontSize: 12,
-    fontWeight: '600',
-  },
-  section: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  jadwalCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
-    elevation: 2,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-  },
-  jadwalCardLewat: {
-    borderLeftColor: COLORS.textLight,
-    opacity: 0.7,
-  },
-  jadwalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  jadwalHari: {
-    fontSize: 16,
-    fontWeight: 'bold',
     color: COLORS.primary,
+    fontWeight: 'bold',
   },
-  badgeLewat: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  badgeLewatText: {
-    fontSize: 10,
-    color: COLORS.textLight,
-  },
-  jadwalTanggal: {
-    color: COLORS.text,
-    fontSize: 14,
-    marginTop: 4,
-  },
-  jadwalJam: {
-    color: COLORS.textLight,
-    fontSize: 13,
-    marginTop: 4,
-  },
-  jadwalKeterangan: {
-    color: COLORS.textLight,
-    fontSize: 13,
-    marginTop: 2,
-  },
-  emptyCard: {
-    backgroundColor: COLORS.white,
+
+  section: { padding: 16 },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
+
+  jadwalCard: {
+    backgroundColor: '#fff',
+    padding: 15,
     borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: COLORS.textLight,
-    fontSize: 14,
-  },
-  actionContainer: {
-    padding: 16,
-    paddingBottom: 30,
-    gap: 10,
-  },
-  btnPrimary: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
+    marginBottom: 12,
     elevation: 3,
   },
-  btnDisabled: {
-    backgroundColor: COLORS.textLight,
-  },
-  btnPrimaryText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  btnSecondary: {
-    backgroundColor: COLORS.secondary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  btnSecondaryText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  btnOutline: {
+
+  cardHariIni: {
     borderWidth: 2,
-    borderColor: COLORS.primary,
+    borderColor: '#ff9800',
+  },
+
+  badgeHariIni: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#ff9800',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+
+  badgeHariIniText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+
+  jadwalHari: { fontWeight: 'bold', fontSize: 14 },
+  jadwalTanggal: { marginVertical: 4 },
+  jadwalJam: { fontSize: 13 },
+  jadwalKeterangan: { marginTop: 4, fontSize: 12 },
+
+  emptyCard: {
+    backgroundColor: '#fff',
+    padding: 15,
     borderRadius: 12,
-    paddingVertical: 14,
+  },
+
+  actionContainer: {
+    padding: 16,
+  },
+
+  btnPrimary: {
+    backgroundColor: COLORS.primary,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+  btnPrimaryText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  btnSecondary: {
+    backgroundColor: '#e3f2fd',
+    padding: 14,
+    borderRadius: 12,
     alignItems: 'center',
   },
-  btnOutlineText: {
+
+  btnSecondaryText: {
     color: COLORS.primary,
     fontWeight: 'bold',
-    fontSize: 15,
   },
 });

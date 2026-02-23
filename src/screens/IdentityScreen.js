@@ -57,7 +57,7 @@ export default function IdentityScreen({ navigation }) {
     setLoading(false);
 
     // Navigasi ke Home Screen
-    navigation.replace('Home');
+    navigation.replace('Main');
   };
 
   return (
