@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import SplashScreen from './src/screens/SplashScreen';
 import IdentityScreen from './src/screens/IdentityScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import AllScheduleScreen from './src/screens/AllScheduleScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
+import BottomTabs from './src/navigate/BottomTabs';
 
 import { requestNotificationPermission } from './src/services/notification';
 import { getUserName, getUserData } from './src/utils/storage';
@@ -15,35 +14,31 @@ import { getUserName, getUserData } from './src/utils/storage';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [initialRoute, setInitialRoute] = useState(null); // null = masih loading
+  const [initialRoute, setInitialRoute] = useState(null);
 
   useEffect(() => {
     initApp();
   }, []);
 
   const initApp = async () => {
-    // Minta izin notifikasi saat pertama buka aplikasi
     await requestNotificationPermission();
 
-    // Cek apakah user sudah login sebelumnya
     const savedName = await getUserName();
     const savedData = await getUserData();
 
     if (savedName && savedData) {
-      // Sudah pernah login → langsung ke Home
-      setInitialRoute('Home');
+      setInitialRoute('Main');
     } else {
-      // Belum pernah login → ke halaman Identity
       setInitialRoute('Identity');
     }
   };
 
-  // Tampilkan splash screen sementara masih loading
   if (initialRoute === null) {
     return <SplashScreen />;
   }
 
   return (
+  <SafeAreaProvider>
     <NavigationContainer>
       <StatusBar style="light" backgroundColor="#1a237e" />
       <Stack.Navigator
@@ -60,21 +55,12 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: 'Dashboard Piket Kejari', headerTitleAlign: 'center', headerBackVisible: false }}
-        />
-        <Stack.Screen
-          name="AllSchedule"
-          component={AllScheduleScreen}
-          options={{ title: 'Jadwal Piket', headerTitleAlign: 'center', }}
-        />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ title: 'Pengaturan', headerTitleAlign: 'center', }} 
+          name="Main"
+          component={BottomTabs}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
-  );
+  </SafeAreaProvider>
+);
 }
