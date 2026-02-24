@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // URL API utama
 const API_URL =
-  'https://raw.githubusercontent.com/Saaannn27/Pengingat-piket-kejari/refs/heads/main/piket-data.json';
+  'https://raw.githubusercontent.com/Saaannn27/Pengingat-piket-kejari/main/piket-data.json';
 
 // 🔁 Fallback data (dipakai kalau API gagal)
 const FALLBACK_DATA = {
