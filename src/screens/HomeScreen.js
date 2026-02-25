@@ -93,6 +93,17 @@ export default function HomeScreen({ navigation }) {
     );
   };
 
+  const getSelisihHari = (tanggal) => {
+    const today = new Date();
+    const target = new Date(tanggal);
+
+    today.setHours(0,0,0,0);
+    target.setHours(0,0,0,0);
+
+    const diffTime = target - today;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -103,37 +114,32 @@ export default function HomeScreen({ navigation }) {
     );
   }
 
-  const now = new Date();
-
-  const isSameDay = (date1, date2) => {
-    return (
-      date1.getDate() === date2.getDate() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getFullYear() === date2.getFullYear()
-    );
-  };
-
   const sortedJadwal =
   userData?.user?.jadwal
     ?.slice()
     .sort((a, b) => {
+      const now = new Date();
+
       const dateA = getDateTime(a.tanggal, a.jam_mulai);
       const dateB = getDateTime(b.tanggal, b.jam_mulai);
 
-      const aHariIni = isSameDay(dateA, now);
-      const bHariIni = isSameDay(dateB, now);
+      const isTodayA = isHariIni(a.tanggal);
+      const isTodayB = isHariIni(b.tanggal);
 
-      const aLewat = dateA < now;
-      const bLewat = dateB < now;
-      if (aHariIni && !bHariIni) return -1;
-      if (!aHariIni && bHariIni) return 1;
-      if (aLewat && !bLewat) return 1;
-      if (!aLewat && bLewat) return -1;
+      const isPastA = dateA < now;
+      const isPastB = dateB < now;
+
+      if (isTodayA && !isTodayB) return -1;
+      if (!isTodayA && isTodayB) return 1;
+
+      if (!isPastA && isPastB) return -1;
+      if (isPastA && !isPastB) return 1;
+
       return dateA - dateB;
     }) || [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.primary }}>
+    <View style={{ flex: 1, backgroundColor: '#f5f7fa' }}>
       
       {/* STATUS BAR */}
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
@@ -152,9 +158,9 @@ export default function HomeScreen({ navigation }) {
         <View
           style={[
             styles.userCard,
+            { paddingTop: insets.top + 20 },
           ]}
         >
-          <Text style={styles.greeting}>Halo 👋</Text>
           <Text style={styles.userName}>{userData?.user?.nama}</Text>
           <Text style={styles.userJabatan}>{userData?.user?.jabatan}</Text>
 
@@ -165,6 +171,14 @@ export default function HomeScreen({ navigation }) {
               </Text>
             </View>
           )}
+          <TouchableOpacity
+            style={styles.btnPrimary}
+            onPress={handleAktifkanPengingat}
+          >
+            <Text style={styles.btnPrimaryText}>
+              🔔 Aktifkan Pengingat
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* SECTION */}
@@ -174,7 +188,7 @@ export default function HomeScreen({ navigation }) {
           {sortedJadwal.length > 0 ? (
             sortedJadwal.map((item, index) => {
               const hariIni = isHariIni(item.tanggal);
-
+              const selisihHari = getSelisihHari(item.tanggal);
               return (
                 <View
                   key={index}
@@ -188,6 +202,19 @@ export default function HomeScreen({ navigation }) {
                       <Text style={styles.badgeHariIniText}>🔥 Hari Ini</Text>
                     </View>
                   )}
+
+                  {/* 🔥 COUNTDOWN BADGE */}
+                  <View style={styles.countdownBadge}>
+                    <Text style={styles.countdownText}>
+                      {(() => {
+                        const selisih = getSelisihHari(item.tanggal);
+
+                        if (selisih === 0) return "Hari Ini";
+                        if (selisih > 0) return `${selisih} hari lagi`;
+                        return "Sudah lewat";
+                      })()}
+                    </Text>
+                  </View>
 
                   <Text style={styles.jadwalHari}>{item.hari}</Text>
                   <Text style={styles.jadwalTanggal}>
@@ -208,35 +235,6 @@ export default function HomeScreen({ navigation }) {
             </View>
           )}
         </View>
-
-        {/* BUTTON */}
-        <View style={styles.actionContainer}>
-          <TouchableOpacity
-            style={styles.btnPrimary}
-            onPress={handleAktifkanPengingat}
-          >
-            <Text style={styles.btnPrimaryText}>
-              🔔 Aktifkan Pengingat
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.btnSecondary}
-            onPress={() => {
-              console.log("USER DATA:", userData);
-              console.log("ALL DATA:", userData?.allData);
-
-              navigation.navigate('AllSchedule', {
-                allData: userData?.allData,
-              });
-            }}
-          >
-            <Text style={styles.btnSecondaryText}>
-              📋 Semua Jadwal
-            </Text>
-          </TouchableOpacity>
-        </View>
-
       </ScrollView>
     </View>
   );
@@ -253,25 +251,28 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    paddingTop: 10,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    marginTop: -35,
   },
 
-  greeting: { color: '#fff', fontSize: 16 },
-  userName: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  userName: { color: '#fff', fontSize: 25, fontWeight: 'bold' },
   userJabatan: { color: '#fff', marginBottom: 10 },
 
   notifBadge: {
-    backgroundColor: '#fff',
-    padding: 6,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
-  },
+  backgroundColor: 'rgba(255,255,255,0.15)',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,0.3)',
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 20,
+  alignSelf: 'flex-start',
+  marginTop: 10,
+},
 
   notifBadgeText: {
     fontSize: 12,
-    color: COLORS.primary,
+    color: '#fff',
     fontWeight: 'bold',
   },
 
@@ -323,11 +324,13 @@ const styles = StyleSheet.create({
   },
 
   btnPrimary: {
-    backgroundColor: COLORS.primary,
-    padding: 14,
+    backgroundColor: '#FBC02D',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    marginTop: 30,
     borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 10,
+    alignSelf: 'stretch',
   },
 
   btnPrimaryText: {
@@ -346,4 +349,20 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: 'bold',
   },
+
+  countdownBadge: {
+  position: 'absolute',
+  bottom: 8,
+  right: 8,
+  backgroundColor: '#e3f2fd',
+  paddingHorizontal: 8,
+  paddingVertical: 4,
+  borderRadius: 8,
+},
+
+countdownText: {
+  fontSize: 10,
+  fontWeight: 'bold',
+  color: COLORS.primary,
+},
 });
