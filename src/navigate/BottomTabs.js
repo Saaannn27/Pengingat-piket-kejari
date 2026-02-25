@@ -16,7 +16,14 @@ export default function BottomTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false,
+        headerShown: true,
+        headerStyle: { 
+            backgroundColor: COLORS.primary 
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: { 
+            fontWeight: 'bold' 
+        },
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: {
@@ -41,17 +48,18 @@ export default function BottomTabs() {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'Dashboard' }}
+        options={{ title: 'Dashboard', headerTitleAlign: 'center' }}
       />
       <Tab.Screen
         name="AllSchedule"
         component={AllScheduleScreen}
-        options={{ title: 'Jadwal' }}
-      />
+        options={{ title: 'Jadwal', headerTitleAlign: 'center' }}
+        initialParams={{ allData: null }}
+     />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: 'Pengaturan' }}
+        options={{ title: 'Pengaturan', headerTitleAlign: 'center' }}
       />
     </Tab.Navigator>
   );
