@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,51 @@ import {
   Alert,
   Switch,
 } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import COLORS from '../constants/colors';
 import { clearUserData } from '../utils/storage';
 import { cancelAllNotifications } from '../services/notification';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({ navigation }) {
+  const [notifEnabled, setNotifEnabled] = useState(false);
+
+  useEffect(() => {
+    loadNotifSetting();
+  }, []);
+
+  const loadNotifSetting = async () => {
+    const value = await AsyncStorage.getItem('NOTIF_ENABLED');
+    if (value === 'true') {
+      setNotifEnabled(true);
+    }
+  };
+
+  const handleToggleNotif = async (value) => {
+    if (value) {
+      // Minta izin notifikasi
+      const { status } = await Notifications.requestPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert(
+          'Izin Ditolak',
+          'Notifikasi tidak dapat diaktifkan tanpa izin.'
+        );
+        return;
+      }
+
+      await AsyncStorage.setItem('NOTIF_ENABLED', 'true');
+      setNotifEnabled(true);
+      Alert.alert('Berhasil', 'Notifikasi diaktifkan.');
+    } else {
+      // Matikan notifikasi
+      await cancelAllNotifications();
+      await AsyncStorage.setItem('NOTIF_ENABLED', 'false');
+      setNotifEnabled(false);
+      Alert.alert('Nonaktif', 'Semua notifikasi dibatalkan.');
+    }
+  };
+
   const handleLogout = () => {
     Alert.alert(
       'Reset Akun',
@@ -33,6 +73,23 @@ export default function SettingsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      
+      {/* NOTIF SECTION */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Notifikasi</Text>
+
+        <View style={styles.menuItem}>
+          <Text style={styles.menuItemText}>Aktifkan Notifikasi</Text>
+          <Switch
+            value={notifEnabled}
+            onValueChange={handleToggleNotif}
+            trackColor={{ false: '#ccc', true: COLORS.primary }}
+            thumbColor="#fff"
+          />
+        </View>
+      </View>
+
+      {/* ACCOUNT SECTION */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Akun</Text>
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
@@ -41,6 +98,7 @@ export default function SettingsScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
+      {/* INFO SECTION */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Informasi Aplikasi</Text>
         <View style={styles.infoItem}>
@@ -52,6 +110,7 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.infoValue}>Expo Managed Workflow</Text>
         </View>
       </View>
+
     </View>
   );
 }
@@ -85,6 +144,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+  },
+  menuItemText: {
+    fontSize: 15,
+    color: COLORS.text,
   },
   menuItemTextDanger: {
     fontSize: 15,
