@@ -169,13 +169,6 @@
       "nama": "Dian",
       "jabatan": "Staf TU",
       "jadwal": [
-        {
-          "tanggal": "2026-02-26",
-          "hari": "Kamis",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASTUN"
-        }
       ]
     }
   ]
