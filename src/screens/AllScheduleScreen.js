@@ -30,14 +30,11 @@ export default function AllScheduleScreen() {
   const loadData = async () => {
     try {
       setLoading(true);
-
       const result = await fetchPiketData();
-      console.log('API RESULT:', result);
 
       if (result && result.success && result.data) {
         setAllData(result.data);
       } else {
-        console.log('Data tidak valid:', result);
         setAllData(null);
       }
     } catch (error) {
@@ -69,11 +66,15 @@ export default function AllScheduleScreen() {
 
   const filteredPetugas = useMemo(() => {
     if (!allData?.petugas) return [];
-    if (!query.trim()) return allData.petugas;
+    let data = allData.petugas.filter(
+      (p) => Array.isArray(p.jadwal) && p.jadwal.length > 0
+    );
+
+    if (!query.trim()) return data;
 
     const keyword = query.trim().toLowerCase();
 
-    return allData.petugas.filter(
+    return data.filter(
       (p) =>
         p.nama?.toLowerCase().includes(keyword) ||
         p.jabatan?.toLowerCase().includes(keyword)
@@ -124,7 +125,7 @@ export default function AllScheduleScreen() {
                 Tahun {allData.tahun}
               </Text>
               <Text style={styles.headerCount}>
-                {allData.petugas.length} petugas terdaftar
+                {filteredPetugas.length} petugas memiliki jadwal
               </Text>
             </View>
 
@@ -161,12 +162,12 @@ export default function AllScheduleScreen() {
               </View>
               <View style={styles.jadwalCountBadge}>
                 <Text style={styles.jadwalCountText}>
-                  {petugas.jadwal?.length || 0}x
+                  {petugas.jadwal.length}x
                 </Text>
               </View>
             </View>
 
-            {petugas.jadwal?.map((jadwal, idx) => {
+            {petugas.jadwal.map((jadwal, idx) => {
               const lewat = isJadwalLewat(
                 jadwal.tanggal,
                 jadwal.jam_mulai
@@ -226,7 +227,7 @@ export default function AllScheduleScreen() {
           <View style={styles.notFoundContainer}>
             <Text style={styles.notFoundIcon}>🔎</Text>
             <Text style={styles.notFoundText}>
-              Nama "{query}" tidak ditemukan.
+              Tidak ada petugas dengan jadwal aktif.
             </Text>
           </View>
         }
