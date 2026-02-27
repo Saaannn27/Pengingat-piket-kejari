@@ -36,7 +36,6 @@ export default function SplashScreen() {
           { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
         ]}
       >
-        {/* Ganti dengan Image komponen jika punya logo */}
         <View style={styles.logoPlaceholder}>
           <Text style={styles.logoEmoji}>🏛️</Text>
         </View>

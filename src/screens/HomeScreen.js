@@ -203,7 +203,7 @@ export default function HomeScreen({ navigation }) {
                     </View>
                   )}
 
-                  {/* 🔥 COUNTDOWN BADGE */}
+                  {/*COUNTDOWN BADGE */}
                   <View style={styles.countdownBadge}>
                     <Text style={styles.countdownText}>
                       {(() => {

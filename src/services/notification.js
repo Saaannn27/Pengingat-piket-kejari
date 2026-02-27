@@ -76,7 +76,7 @@ export const scheduleNotificationPiket = async (jadwalItem) => {
     };
   }
 
-  // Jadwal belum lewat → hitung selisih detik dari sekarang
+  //hitung selisih detik jadwal dari sekarang
   const selisihMs = jadwalTimestamp - sekarangTimestamp;
   const triggerSeconds = Math.floor(selisihMs / 1000);
   const keteranganWaktu = `${jadwalItem.tanggal} pukul ${jadwalItem.jam_mulai} WIB`;

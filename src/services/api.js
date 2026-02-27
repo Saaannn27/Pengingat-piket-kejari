@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_URL =
   'https://raw.githubusercontent.com/Saaannn27/Pengingat-piket-kejari/main/piket-data.json';
 
-// 🔁 Fallback data (dipakai kalau API gagal)
+// Fallback data (dipakai kalau API gagal)
 const FALLBACK_DATA = {
   instansi: "Kejaksaan Negeri Agam",
   bulan: "Februari",
@@ -176,7 +176,7 @@ export const fetchPiketData = async () => {
   }
 };
 
-// Cari user berdasarkan nama (case-insensitive)
+// Cari user berdasarkan nama 
 export const findUserByName = (data, nama) => {
   if (!data || !data.petugas) return null;
 
