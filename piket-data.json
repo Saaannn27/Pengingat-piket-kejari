@@ -1,174 +1,315 @@
 {
   "instansi": "Kejaksaan Negeri Agam",
-  "bulan": "Februari",
+  "bulan": "Maret",
   "tahun": 2026,
   "petugas": [
     {
       "id": 1,
-      "nama": "Fabio",
-      "jabatan": "Jaksa Fungsional",
+      "nama": "Ade Hary Marias",
+      "jabatan": "Pengawas",
       "jadwal": [
-        {
-          "tanggal": "2026-02-16",
-          "hari": "Senin",
-          "jam_mulai": "09:07",
-          "jam_selesai": "17:00",
-          "keterangan": "KASI BB"
-        },
-        {
-          "tanggal": "2026-02-23",
-          "hari": "Senin",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASI BB"
-        },
-        {
-          "tanggal": "2026-03-02",
-          "hari": "Senin",
-          "jam_mulai": "09:07",
-          "jam_selesai": "17:00",
-          "keterangan": "KASI BB"
-        },
-        {
-          "tanggal": "2026-03-09",
-          "hari": "Senin",
-          "jam_mulai": "09:07",
-          "jam_selesai": "17:00",
-          "keterangan": "KASI BB"
-        }
+        { "tanggal": "2026-03-02", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-11", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-25", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 2,
-      "nama": "Azaria",
-      "jabatan": "Staf TU",
+      "nama": "Yudhi Harioga",
+      "jabatan": "Pengawas",
       "jadwal": [
-        {
-          "tanggal": "2026-01-19",
-          "hari": "Senin",
-          "jam_mulai": "09:07",
-          "jam_selesai": "17:00",
-          "keterangan": "KASI BB"
-        }
+        { "tanggal": "2026-03-03", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-10", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-18", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-26", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 3,
-      "nama": "Yeli",
-      "jabatan": "Jaksa Fungsional",
+      "nama": "T Apriyaldi Ansyah",
+      "jabatan": "Pengawas",
       "jadwal": [
-        {
-          "tanggal": "2026-01-20",
-          "hari": "Selasa",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASUBAG"
-        }
+        { "tanggal": "2026-03-04", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-12", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-27", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 4,
-      "nama": "Larosa",
-      "jabatan": "Staf TU",
+      "nama": "Nofrizal",
+      "jabatan": "Pengawas",
       "jadwal": [
-        {
-          "tanggal": "2026-01-20",
-          "hari": "Selasa",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASUBAG"
-        }
+        { "tanggal": "2026-03-05", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-13", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-30", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 5,
-      "nama": "Satya",
-      "jabatan": "Jaksa Fungsional",
+      "nama": "Jovan Kurata Waruwu",
+      "jabatan": "Pengawas",
       "jadwal": [
-        {
-          "tanggal": "2026-01-21",
-          "hari": "Rabu",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASTEL"
-        }
+        { "tanggal": "2026-03-06", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-16", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-31", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 6,
-      "nama": "Tika",
-      "jabatan": "Jaksa Fungsional",
+      "nama": "Hengki Neldo",
+      "jabatan": "Pengawas",
       "jadwal": [
-        {
-          "tanggal": "2026-01-21",
-          "hari": "Rabu",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASTEL"
-        }
+        { "tanggal": "2026-03-09", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-17", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
+
     {
       "id": 7,
-      "nama": "Dzikrul",
-      "jabatan": "Staf TU",
+      "nama": "Fabio Alpacino Sinapiar",
+      "jabatan": "Pelaksana",
       "jadwal": [
-        {
-          "tanggal": "2026-01-22",
-          "hari": "Kamis",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASDUM"
-        }
+        { "tanggal": "2026-03-02", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-11", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 8,
-      "nama": "Winda",
-      "jabatan": "Jaksa Fungsional",
+      "nama": "Mutiara Shalsa Nabila",
+      "jabatan": "Pelaksana",
       "jadwal": [
-        {
-          "tanggal": "2026-01-22",
-          "hari": "Kamis",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASDUM"
-        }
+        { "tanggal": "2026-03-03", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-17", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 9,
-      "nama": "Mutiara",
-      "jabatan": "Jaksa Fungsional",
+      "nama": "Digahayu Utari Akmal",
+      "jabatan": "Pelaksana",
       "jadwal": [
-        {
-          "tanggal": "2026-01-23",
-          "hari": "Jumat",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASTUN"
-        }
+        { "tanggal": "2026-03-04", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 10,
-      "nama": "Indah",
-      "jabatan": "Staf TU",
+      "nama": "Baskoro",
+      "jabatan": "Pelaksana",
       "jadwal": [
-        {
-          "tanggal": "2026-01-23",
-          "hari": "Jumat",
-          "jam_mulai": "08:00",
-          "jam_selesai": "17:00",
-          "keterangan": "KASTUN"
-        }
+        { "tanggal": "2026-03-05", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     },
     {
       "id": 11,
-      "nama": "Dian",
-      "jabatan": "Staf TU",
+      "nama": "Fellya Perdana Okta Fasril",
+      "jabatan": "Pelaksana",
       "jadwal": [
+        { "tanggal": "2026-03-06", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 12,
+      "nama": "Dian Fajari Illahiah",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-09", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-27", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 13,
+      "nama": "Roro Desy Puspitasari",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-10", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-27", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 14,
+      "nama": "Shalsa Anugerah Deri Putri",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-12", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-30", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 15,
+      "nama": "Reverina Andeska",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-13", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 16,
+      "nama": "Pranade Mas",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-16", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 17,
+      "nama": "Revi Novala Krishesea",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-18", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 18,
+      "nama": "Alinisfi Bonardo",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-25", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 19,
+      "nama": "Rani Yolanda",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-26", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 20,
+      "nama": "Muhammad Dzikrul Haq",
+      "jabatan": "Pelaksana",
+      "jadwal": [
+        { "tanggal": "2026-03-31", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+
+    {
+      "id": 21,
+      "nama": "Indah Permata Sari",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-02", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 22,
+      "nama": "Azaria Kurnia Helmi",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-03", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 23,
+      "nama": "Hanifah Shabrina",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-04", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 24,
+      "nama": "Arnol Tiogenura",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-05", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 25,
+      "nama": "Shahila Nurini Alizar",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-06", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 26,
+      "nama": "Gusma Winda",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-09", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 27,
+      "nama": "Christiandi Larosa",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-10", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 28,
+      "nama": "Mega Silvia",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-11", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 29,
+      "nama": "Juwandi Eka Putra",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-12", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-27", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 30,
+      "nama": "Abul Walid Ulung",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-13", "hari": "Jumat", "jam_mulai": "08:00", "jam_selesai": "17:00" },
+        { "tanggal": "2026-03-26", "hari": "Kamis", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 31,
+      "nama": "Safa Tasya Nabila",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-16", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 32,
+      "nama": "Annisa Ulfani Resti Rizal",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-17", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 33,
+      "nama": "Salsabila",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-18", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 34,
+      "nama": "Zul Akram Sahar",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-25", "hari": "Rabu", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 35,
+      "nama": "Tika Isella",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-30", "hari": "Senin", "jam_mulai": "08:00", "jam_selesai": "17:00" }
+      ]
+    },
+    {
+      "id": 36,
+      "nama": "Mei Bagus Ivantoro",
+      "jabatan": "Anggota",
+      "jadwal": [
+        { "tanggal": "2026-03-31", "hari": "Selasa", "jam_mulai": "08:00", "jam_selesai": "17:00" }
       ]
     }
   ]
