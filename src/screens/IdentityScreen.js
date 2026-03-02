@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  FlatList,
 } from 'react-native';
 import COLORS from '../constants/colors';
 import { fetchPiketData, findUserByName } from '../services/api';
@@ -18,9 +19,34 @@ export default function IdentityScreen({ navigation }) {
   const [nama, setNama] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [allPetugas, setAllPetugas] = useState([]);
+  const [showSuggestion, setShowSuggestion] = useState(false);
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const loadInitialData = async () => {
+    const result = await fetchPiketData();
+    if (result.success && result.data?.petugas) {
+      setAllPetugas(result.data.petugas);
+    }
+  };
+
+  const suggestions = useMemo(() => {
+    if (!nama.trim()) return [];
+    return allPetugas.filter((p) =>
+      p.nama?.toLowerCase().includes(nama.toLowerCase())
+    );
+  }, [nama, allPetugas]);
+
+  const handleSelectSuggestion = (selectedName) => {
+    setNama(selectedName);
+    setShowSuggestion(false);
+    setError('');
+  };
 
   const handleLanjut = async () => {
-    // Validasi: nama tidak boleh kosong
     if (!nama.trim()) {
       setError('Nama tidak boleh kosong.');
       return;
@@ -29,7 +55,6 @@ export default function IdentityScreen({ navigation }) {
     setLoading(true);
     setError('');
 
-    // Fetch data dari API
     const result = await fetchPiketData();
 
     if (!result.success) {
@@ -38,16 +63,14 @@ export default function IdentityScreen({ navigation }) {
       return;
     }
 
-    // Cari user berdasarkan nama
     const userDitemukan = findUserByName(result.data, nama);
 
     if (!userDitemukan) {
-      setError(`Nama "${nama}" tidak ditemukan dalam daftar piket. Periksa ejaan nama kamu.`);
+      setError(`Nama "${nama}" tidak ditemukan dalam daftar piket.`);
       setLoading(false);
       return;
     }
 
-    // Simpan data user ke AsyncStorage
     await saveUserName(userDitemukan.nama);
     await saveUserData({
       user: userDitemukan,
@@ -55,8 +78,6 @@ export default function IdentityScreen({ navigation }) {
     });
 
     setLoading(false);
-
-    // Navigasi ke Home Screen
     navigation.replace('Main');
   };
 
@@ -68,23 +89,51 @@ export default function IdentityScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.emoji}>🏛️</Text>
         <Text style={styles.title}>Piket Kejari</Text>
-        <Text style={styles.subtitle}>Masukkan nama kamu untuk melihat jadwal piket</Text>
+        <Text style={styles.subtitle}>
+          Masukkan nama kamu untuk melihat jadwal piket
+        </Text>
       </View>
 
       <View style={styles.form}>
         <Text style={styles.label}>Nama Lengkap</Text>
-        <TextInput
-          style={[styles.input, error ? styles.inputError : null]}
-          placeholder="Contoh: Ahmad Fauzi"
-          value={nama}
-          onChangeText={(text) => {
-            setNama(text);
-            setError(''); // hapus error saat user mengetik
-          }}
-          autoCapitalize="words"
-          returnKeyType="done"
-          onSubmitEditing={handleLanjut}
-        />
+
+        <View>
+          <TextInput
+            style={[styles.input, error ? styles.inputError : null]}
+            placeholder="Contoh: Ahmad Fauzi"
+            value={nama}
+            onChangeText={(text) => {
+              setNama(text);
+              setError('');
+              setShowSuggestion(true);
+            }}
+            autoCapitalize="words"
+            returnKeyType="done"
+            onSubmitEditing={handleLanjut}
+          />
+
+          {showSuggestion && suggestions.length > 0 && (
+            <View style={styles.suggestionBox}>
+              <FlatList
+                keyboardShouldPersistTaps="handled"
+                data={suggestions.slice(0, 5)}
+                keyExtractor={(item) => item.id?.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.suggestionItem}
+                    onPress={() =>
+                      handleSelectSuggestion(item.nama)
+                    }
+                  >
+                    <Text style={styles.suggestionText}>
+                      {item.nama}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
+        </View>
 
         {error ? (
           <View style={styles.errorContainer}>
@@ -158,6 +207,22 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     backgroundColor: '#fafafa',
   },
+  suggestionBox: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    marginTop: 5,
+    maxHeight: 180,
+  },
+  suggestionItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  suggestionText: {
+    fontSize: 14,
+  },
   inputError: {
     borderColor: COLORS.error,
   },
@@ -170,7 +235,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: COLORS.error,
     fontSize: 13,
-    lineHeight: 18,
   },
   button: {
     backgroundColor: COLORS.primary,
@@ -178,7 +242,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 20,
-    elevation: 3,
   },
   buttonDisabled: {
     backgroundColor: COLORS.textLight,
@@ -187,6 +250,5 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
-    letterSpacing: 1,
   },
 });
